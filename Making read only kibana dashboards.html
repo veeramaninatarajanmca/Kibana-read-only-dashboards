@@ -1,0 +1,332 @@
+		<html>
+
+		<head>
+		  <style>
+			body {
+				margin : 0px;
+			}
+			#header a{
+				color: white;
+				text-decoration : none;
+			}
+			#header {
+				padding: 14px;
+				background-color: #3caed2;
+			}
+			.filterdata-div input {
+				height : 24px;
+			}
+			.display-inlineblk {
+				display : inline-block !important;
+			}
+			.float-right {
+				float: right;
+			}
+			.filterdata-div {
+				margin-right: 20px;
+			}
+			#dpfilterlist {
+				height: 24px;
+				padding: 0;
+			}
+			#btnGo {
+				width: 50px;
+				height: 24px;
+				border-radius: 10px;
+				border-width: 0px;
+			}
+			#home {
+				padding-right: 10px;
+			}
+			.cursor-pointer {
+				cursor : pointer;
+			}
+			#submitForm {
+			  width: 500px;
+			  margin: 0 auto;
+			  background: #e2e4de;
+			  height: 100%;
+			  padding: 20px 20px 0px 25px;
+			}
+
+			#submitForm span {
+			  width: 30%;
+			  display: block;
+			  float: left;
+			}
+
+			#submitForm .content {
+			  padding-bottom: 10px;
+			}
+
+			.header {
+			  text-align: center;
+			  margin-top: 10px;
+			  margin-bottom: 10px;
+			}
+
+			#submitForm input[type="text"],
+			#submitForm input[type="date"],
+			#submitForm input[type="number"],
+			#submitForm select
+			 {
+			  width: 35%;
+			}
+
+			#btnSubmitDiv {
+			  width: 200px;
+			  margin: 0 auto;
+			}
+			/* spinner */
+			.spinner {
+			  position: absolute;
+			  top: 50%;
+			  z-index: 100;
+			  right: 0;
+			  left: 0;
+			  text-align: center;
+			  margin: 0 auto;
+			  height: 35px;
+			  width: 35px;
+			  animation: rotate 0.8s infinite linear;
+			  border: 3px solid gray;
+			  border-right-color: transparent;
+			  border-radius: 50%;
+			}
+
+			@keyframes rotate {
+			  0%    { transform: rotate(0deg); }
+			  100%  { transform: rotate(360deg); }
+			}
+		  </style>
+		  <!--<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>   -->
+		  <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" crossorigin='anonymous'></script>-->
+		  <script src='https://code.jquery.com/jquery-3.1.1.min.js' crossorigin='anonymous'> </script>
+		  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"> </script>
+		</head>
+
+		<body>
+		  <!--<h3 class="header">Social Media Analysis</h3>-->
+		  <div id="header">
+			<div class="display-inlineblk">
+				<a id="home" href="/social-media-analysis"> HOME </a>
+				<a id="fb-menu" class="cursor-pointer" style="display: none"> Facebook Dashboard </a>
+				<a id="twitter-menu" class="cursor-pointer" > Twitter Dashboard </a>
+			</div>
+			<div class="display-inlineblk float-right filterdata-div">
+			  <span>Start Date </span>
+			  <input type="date" placeholder="Start Date" class="display-inlineblk" id="dashboard-sdate" />
+			  <span>End Date </span>
+			  <input type="date" placeholder="End Date" class="display-inlineblk" id="dashboard-edate" />
+			  <select id="dpfilterlist" class="display-inlineblk">
+				<option value="week" >Last week</option>
+				<option value="month">Last Month</option>
+				<option value="year">Last Year</option>
+				<option value="custom" selected>Custom</option>
+			  </select>
+			  <button id="btnGo"> Go </button>
+			</div>
+		  </div>
+		  <div id="submitForm">
+			<div class="content">
+			  <span>Facebook Handle </span>
+			  <input type="text" placeholder="Facebook handle" id="facebookhandle" />
+			</div>
+			<div class="content">
+			  <span>Twitter Handle </span>
+			  <input type="text" placeholder="Twitter handle" id="twitterhandle" />
+			</div>
+			<div class="content">
+			  <span>Start Date </span>
+			  <input type="date" placeholder="Start Date" id="sdate" />
+			</div>
+			<div class="content">
+			  <span>End Date </span>
+			  <input type="date" placeholder="End Date" id="edate" />
+			</div>
+			<div class="content">
+			  <span>Streaming Time </span>
+			  <input type="number" placeholder="Streaming Time" value="15" id="stime" /> Minutes
+			</div>
+			<div class="content">
+			  <span>Mode </span>
+			  <!--<input type="text" placeholder="Mode" id="mode" />-->
+			  <select id="mode">
+				<option value="historical" selected>Historical</option>
+				<option value="live">Live</option>
+				<option value="both">Both</option>
+			  </select>
+			</div>
+			<div id="btnSubmitDiv">
+			  <input type="submit" id="btnsubmit" />
+			</div>
+		  </div>
+		  <div>
+		  <div>
+			<iframe id="formdetail" width="100%" height="100%" frameborder="0" ></iframe>
+		  </div>
+		  <div id="spinnerEle">
+			<div class="spinner"></div>
+		  </div>
+		  <script>
+			if(window.location.origin.startsWith('http://')) {
+				jQuery("#home").attr('src', '/social-media-analysis');
+			}
+			jQuery('#spinnerEle').hide();
+			jQuery('#header').hide();
+			jQuery('#formdetail').parent().hide();
+			if(jQuery("#mode option:selected").val() === 'historical') {
+			  jQuery('#stime').parent().hide();
+			}
+			function getUrl(url,data) {
+			  return url+data+"/veerarestapi";
+			}
+			jQuery("#fb-menu").click(function () {
+				var twitterVal = jQuery('#facebookhandle').val();
+				jQuery("#formdetail").attr('src', getNavigationUrl(twitterVal, 'facebook'));
+				jQuery('#fb-menu').hide();
+				jQuery('#twitter-menu').show();
+			});
+			jQuery("#twitter-menu").click(function () {
+				var fbVal = jQuery('#twitterhandle').val();		
+				jQuery("#formdetail").attr('src', getNavigationUrl(fbVal, 'twitter')); 
+				jQuery('#fb-menu').show();
+				jQuery('#twitter-menu').hide();
+			});
+			jQuery("#btnsubmit").click(function () {
+			  var fbhandle = jQuery('#facebookhandle').val();
+			  var twitterHandle = jQuery('#twitterhandle').val();
+			  var sDate = jQuery('#sdate').val();
+			  var eDate = jQuery('#edate').val();
+			  var sTime = jQuery('#stime').val();
+			  var mode = jQuery("#mode option:selected").val();
+			  var IsValidationSuccess = validateForm(fbhandle, twitterHandle, sDate, eDate, sTime, mode);
+			  if (IsValidationSuccess) {
+				jQuery('#spinnerEle').show();  
+				var queryString = "?client=" + fbhandle + "&sdate=" + sDate + "&streamingtime=" + sTime + "&edate=" + eDate + "&mode=" + mode;
+				jQuery.ajax({
+				  method: 'GET',
+				  contentType: 'application/json',
+				  url: getUrl('RestAPILinktocollectfbdata.amazonaws.com/','facebook') + queryString,
+				  crossDomain: true,
+				  dataType: 'jsonp',
+				  jsonp: "jsoncallback",
+				  statusCode: {
+					200: function (data) {
+					  var queryString = "?client=" + twitterHandle + "&sdate=" + sDate + "&streamingtime=" + sTime + "&edate=" + eDate + "&mode=" + mode;
+					  jQuery.ajax({
+						method: 'GET',
+						contentType: 'application/json',
+						url: getUrl('RestAPILInktocollecttwitterdata.amazonaws.com/','twitter') + queryString,
+						crossDomain: true,
+						dataType: 'jsonp',
+						jsonp: "jsoncallback",
+						statusCode: {
+						  200: function (data) {
+							jQuery('#spinnerEle').hide();
+							<!-- var navUrl = "https://your_kibana_endpoint_url.us-east-1.es.amazonaws.com/_plugin/kibana/app/kibana?#/dashboard/daf06480-4ea4-11e7-b605-91fe9115cb82?_g=(refreshInterval:('$$hashKey':'object:583',display:'30%20seconds',pause:!f,section:1,value:30000),time:(from:now-1y,mode:quick,to:now))&_a=(filters:!(),options:(darkTheme:!f),panels:!((col:1,id:baf65b80-4ea4-11e7-b605-91fe9115cb82,panelIndex:1,row:1,size_x:5,size_y:3,type:visualization),(col:6,id:'3080ac50-4eac-11e7-b605-91fe9115cb82',panelIndex:2,row:1,size_x:4,size_y:3,type:visualization),(col:7,id:'71bdb910-4eac-11e7-b605-91fe9115cb82',panelIndex:3,row:11,size_x:6,size_y:3,type:visualization),(col:1,id:a553bf40-4eac-11e7-b605-91fe9115cb82,panelIndex:4,row:11,size_x:6,size_y:3,type:visualization),(col:1,id:'6f840040-4ead-11e7-b605-91fe9115cb82',panelIndex:5,row:8,size_x:8,size_y:3,type:visualization),(col:9,id:'6b432cd0-4eae-11e7-b605-91fe9115cb82',panelIndex:6,row:8,size_x:4,size_y:3,type:visualization),(col:1,id:bda24b30-4eb0-11e7-a34d-975c9fdec964,panelIndex:7,row:4,size_x:12,size_y:4,type:visualization),(col:1,id:'813d1a20-4f51-11e7-a35b-c1a98752623f',panelIndex:8,row:14,size_x:12,size_y:3,type:visualization),(col:10,id:f5f07010-4f51-11e7-a35b-c1a98752623f,panelIndex:9,row:1,size_x:3,size_y:2,type:visualization)),query:(query_string:(analyze_wildcard:!t,query:'Client:"+fbhandle+"')),title:'Facebook%20Listener',uiState:(P-2:(vis:(legendOpen:!f)),P-3:(vis:(legendOpen:!f)),P-4:(vis:(legendOpen:!f)),P-7:(vis:(params:(sort:(columnIndex:2,direction:desc)))),P-8:(vis:(legendOpen:!f))))"; -->
+							<!-- window.location.href = navUrl; -->
+							jQuery('#submitForm').hide();
+							jQuery('#header').show();	
+							jQuery('#formdetail').parent().show();
+							jQuery('#dashboard-sdate').attr('value',sDate);
+							jQuery('#dashboard-edate').attr('value',eDate);
+							jQuery("#formdetail").attr('src', getNavigationUrl(fbhandle, 'facebook'));
+						  }
+						}
+					  });
+					}
+				  }
+				});
+			  }
+			});
+			function getNavigationUrl(data, ref) {
+			var sdate_timestamp = moment(jQuery('#dashboard-sdate').val()).add(5, 'hours').add(30, 'minutes').toISOString();
+			var edate_timestamp = moment(jQuery('#dashboard-edate').val()).add(5, 'hours').add(30, 'minutes').toISOString();
+			var navUrl = '';
+			if(ref == 'facebook') {
+				navUrl = "https://your_kibana_endpoint_url.us-east-1.es.amazonaws.com/_plugin/kibana/app/kibana?#/dashboard/daf06480-4ea4-11e7-b605-91fe9115cb82?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:'"+sdate_timestamp+"',mode:absolute,to:'"+edate_timestamp+"'))&_a=(filters:!(),options:(darkTheme:!f),panels:!((col:1,id:baf65b80-4ea4-11e7-b605-91fe9115cb82,panelIndex:1,row:1,size_x:5,size_y:3,type:visualization),(col:6,id:'3080ac50-4eac-11e7-b605-91fe9115cb82',panelIndex:2,row:1,size_x:4,size_y:3,type:visualization),(col:7,id:'71bdb910-4eac-11e7-b605-91fe9115cb82',panelIndex:3,row:11,size_x:6,size_y:3,type:visualization),(col:1,id:a553bf40-4eac-11e7-b605-91fe9115cb82,panelIndex:4,row:11,size_x:6,size_y:3,type:visualization),(col:1,id:'6f840040-4ead-11e7-b605-91fe9115cb82',panelIndex:5,row:8,size_x:8,size_y:3,type:visualization),(col:9,id:'6b432cd0-4eae-11e7-b605-91fe9115cb82',panelIndex:6,row:8,size_x:4,size_y:3,type:visualization),(col:1,id:bda24b30-4eb0-11e7-a34d-975c9fdec964,panelIndex:7,row:4,size_x:12,size_y:4,type:visualization),(col:1,id:'813d1a20-4f51-11e7-a35b-c1a98752623f',panelIndex:8,row:14,size_x:12,size_y:3,type:visualization),(col:10,id:f5f07010-4f51-11e7-a35b-c1a98752623f,panelIndex:9,row:1,size_x:3,size_y:2,type:visualization)),query:(query_string:(analyze_wildcard:!t,query:'Client:"+data+"')),title:'Facebook%20Listener',uiState:(P-2:(vis:(legendOpen:!f)),P-3:(vis:(legendOpen:!f)),P-4:(vis:(legendOpen:!f)),P-7:(vis:(params:(sort:(columnIndex:2,direction:desc)))),P-8:(vis:(legendOpen:!f))))&embed=true";		
+				} else {
+				navUrl = "https://your_kibana_endpoint_url.us-east-1.es.amazonaws.com/_plugin/kibana/app/kibana?#/dashboard/c7f9d7d0-4c6f-11e7-9af9-17cd0d52ebb7?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:'"+sdate_timestamp+"',mode:absolute,to:'"+edate_timestamp+"'))&_a=(filters:!(),options:(darkTheme:!f),panels:!((col:1,id:fa5a2b50-4e6b-11e7-9749-8d42d638fc8a,panelIndex:3,row:1,size_x:2,size_y:3,type:visualization),(col:7,id:a297b5b0-4e6e-11e7-83aa-51f128679985,panelIndex:6,row:1,size_x:6,size_y:3,type:visualization),(col:1,id:'2b6a57b0-4e71-11e7-83aa-51f128679985',panelIndex:7,row:4,size_x:12,size_y:5,type:visualization),(col:1,id:'1a909580-4e76-11e7-9a23-d3dc388ca75a',panelIndex:8,row:13,size_x:12,size_y:4,type:visualization),(col:1,id:'1dc9d210-4e77-11e7-9b93-87d2abbcb505',panelIndex:9,row:9,size_x:12,size_y:4,type:visualization),(col:3,id:cf1a8fb0-4f4d-11e7-a850-973f3c7e609b,panelIndex:10,row:1,size_x:4,size_y:3,type:visualization)),query:(query_string:(analyze_wildcard:!t,query:'Client:"+data+"')),title:'Twitter%20Listener',uiState:(P-7:(spy:(mode:(fill:!f,name:!n)),vis:(params:(sort:(columnIndex:0,direction:asc)))),P-8:(vis:(legendOpen:!f))))&embed=true";
+				}
+				return navUrl;
+			}
+			function validateForm(fbhandle, twitterHandle, sDate, eDate, sTime, mode) {
+			  if(fbhandle === '' ) {
+				alert("Please fill the Facebook data");
+				return false;
+			  } else if(twitterHandle === '') {
+				alert("Please fill the Twitter data");
+				return false;
+			  } else if(sDate === '') {
+				alert("Please select the Start Date");
+				return false;
+			  } else if(eDate === '') {
+				alert("Please fill the End Date");
+				return false;       
+			  }  else if(new Date(sDate) > new Date(eDate)) {
+				alert("End Date should be greater than Start Date");
+				return false;  
+			  }
+			  else if(sTime === '') {
+				alert("Please fill the Facebook data");
+				return false;
+			  }
+			  return true;
+			}
+			jQuery("#mode").change(function (data) {
+			  if(data.target.value === 'historical') {
+				jQuery('#stime').parent().hide();
+			  } else {
+				jQuery('#stime').parent().show();
+			  }
+			});
+			jQuery("#dpfilterlist").change(function (data) {
+				if(data.target.value == 'custom') {
+					jQuery('#dashboard-sdate').removeAttr("disabled");
+					jQuery('#dashboard-edate').removeAttr("disabled");
+					jQuery('#btnGo').css('visibility', 'visible');
+					return;
+				} else {
+					jQuery('#dashboard-sdate').attr('disabled', 'true');
+					jQuery('#dashboard-edate').attr('disabled','true');
+					jQuery('#btnGo').css('visibility', 'hidden');
+				}
+				var fbhandle = jQuery('#facebookhandle').val();
+				var twitterHandle = jQuery('#twitterhandle').val();
+				var curDate;
+				jQuery('#dashboard-edate').attr('value',moment().format('YYYY-MM-DD'));
+				jQuery('#dashboard-edate')[0].value = moment().format('YYYY-MM-DD');
+				if(data.target.value === 'week') {
+					curDate = moment().subtract(7, 'days');
+				} else if(data.target.value === 'month') {		
+					curDate = moment().subtract(1, 'months');
+				} else if(data.target.value === 'year') {
+					curDate = moment().subtract(1, 'years');
+				}
+				var sdateVal = curDate.format('YYYY-MM-DD');
+				jQuery('#dashboard-sdate').attr('value',sdateVal);
+				jQuery('#dashboard-sdate')[0].value = sdateVal;
+				if(!jQuery('#fb-menu').is(":visible")) {
+					jQuery("#formdetail").attr('src', getNavigationUrl(fbhandle, 'facebook'));
+				} else {
+					jQuery("#formdetail").attr('src', getNavigationUrl(twitterHandle, 'twitter'));
+				}
+			});
+			jQuery("#btnGo").click(function () {
+				if(new Date(jQuery('#dashboard-sdate').val()) > new Date(jQuery('#dashboard-edate').val())) {
+					alert("End Date should be greater than Start Date");
+					return;  
+				}
+				var fbhandle = jQuery('#facebookhandle').val();
+				var twitterHandle = jQuery('#twitterhandle').val();
+				if(!jQuery('#fb-menu').is(":visible")) {
+					jQuery("#formdetail").attr('src', getNavigationUrl(fbhandle, 'facebook'));
+				} else {
+					jQuery("#formdetail").attr('src', getNavigationUrl(twitterHandle, 'twitter'));
+				}
+			});
+		  </script>
+		</body>
+
+		</html>
